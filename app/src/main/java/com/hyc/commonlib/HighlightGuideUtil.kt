@@ -2,6 +2,7 @@ package com.hyc.commonlib
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
@@ -9,7 +10,8 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.ViewTreeObserver.OnDrawListener
 import android.widget.ImageView
 import android.widget.LinearLayout
-import java.lang.IllegalArgumentException
+import java.lang.RuntimeException
+import java.util.Stack
 
 /**
  * @author: 贺宇成
@@ -24,7 +26,7 @@ class HighlightGuideUtil(
   private val onClickListener: OnClickListener? = null
 ) : OnClickListener {
 
-  private var mListeners: MutableList<OnDrawListener> = mutableListOf()
+  private var mListener: OnDrawListener? = null
   private val mImageViews: MutableList<ImageView> = mutableListOf()
   private var mGuideView: View? = null
   private val viewMapping: MutableMap<View, View> = mutableMapOf()
@@ -45,34 +47,48 @@ class HighlightGuideUtil(
       showGuideViewInternal(*highlightView, showListener = showListener)
       return
     }
-    highlightView.forEach { view ->
-      val listener = object : OnDrawListener {
-        override fun onDraw() {
-          if (removeOnDrawListener(view, this) && mListeners.size == 0) {
-            mRootView.post {
-              showGuideViewInternal(*highlightView, showListener = showListener)
-            }
-          }
+    val lastDrawView = getLastDrawView(mRootView, highlightView)
+    lastDrawView ?: throw RuntimeException("not find lastDrawView")
+    Log.d(this::class.java.simpleName, "find lastDrawView $lastDrawView")
+    mListener = object : OnDrawListener {
+      override fun onDraw() {
+        mListener ?: return
+        val listener = mListener
+        mListener = null
+        mRootView.post {
+          lastDrawView.viewTreeObserver.removeOnDrawListener(listener)
+          showGuideViewInternal(*highlightView, showListener = showListener)
         }
       }
-      mListeners.add(listener)
-      view.viewTreeObserver.addOnDrawListener(listener)
     }
+    lastDrawView.viewTreeObserver.addOnDrawListener(mListener)
 
   }
 
   /**
-   * 移除绘制监听，并且返回结构
-   * @return 移除是否成功
+   * 后续遍历ViewTree找到最后绘制的View
    */
-  private fun removeOnDrawListener(view: View, listener: OnDrawListener): Boolean {
-    val res = mListeners.remove(listener)
-    if (res) {
-      mRootView.post {
-        view.viewTreeObserver.removeOnDrawListener(listener)
+  private fun getLastDrawView(parentView: ViewGroup, highlightView: Array<out View>): View? {
+    if (highlightView.size == 1) {
+      return highlightView[0]
+    }
+    val stack = Stack<View>()
+    stack.push(parentView)
+    val viewMap = mutableMapOf<View, Boolean>()
+    while (stack.isNotEmpty()) {
+      val view = stack.peek()
+      if (view is ViewGroup && !viewMap.containsKey(view)) {
+        viewMap[view] = true
+        for (index in 0 until view.childCount) {
+          stack.push(view.getChildAt(index))
+        }
+      } else if (highlightView.contains(view)) {
+        return view
+      } else {
+        stack.pop()
       }
     }
-    return res
+    return null
   }
 
   private fun showGuideViewInternal(
@@ -169,7 +185,6 @@ class HighlightGuideUtil(
     }
     mImageViews.clear()
     viewMapping.clear()
-    mListeners.clear()
   }
 
   override fun onClick(v: View?) {
