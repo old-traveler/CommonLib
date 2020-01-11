@@ -6,7 +6,23 @@ package com.hyc.netcache
  * @desc:
  */
 data class NetCacheBean(
+  val url : String,
   val saveTime : Long,
   val cacheConfig : CacheConfig,
   val data : Any
-)
+){
+  override fun equals(other: Any?): Boolean {
+    if (other is NetCacheBean){
+      return other.url == url
+    }
+    return false
+  }
+
+  override fun hashCode(): Int {
+    var result = url.hashCode()
+    result = 31 * result + saveTime.hashCode()
+    result = 31 * result + cacheConfig.hashCode()
+    result = 31 * result + data.hashCode()
+    return result
+  }
+}
