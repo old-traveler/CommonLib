@@ -1,5 +1,7 @@
 package com.hyc.netcache
 
+import android.content.Context
+
 /**
  * @author: 贺宇成
  * @date: 2020-01-10 15:10
@@ -7,8 +9,8 @@ package com.hyc.netcache
  */
 class NetCachePoolFactory {
 
-  fun fileNetCachePool(){
-
+  fun fileNetCachePool(context: Context) : NetCachePool{
+    return FileNetCachePool(context)
   }
 
 }
