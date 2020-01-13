@@ -7,10 +7,10 @@ import android.content.Context
  * @date: 2020-01-10 15:10
  * @desc:
  */
-class NetCachePoolFactory {
+object NetCachePoolFactory {
 
-  fun fileNetCachePool(context: Context) : NetCachePool{
-    return FileNetCachePool(context)
+  inline fun newSpNetCachePool(context: () -> Context): NetCachePool {
+    return SpNetCachePool(context())
   }
 
 }

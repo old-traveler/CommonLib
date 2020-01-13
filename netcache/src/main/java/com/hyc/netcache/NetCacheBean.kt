@@ -5,14 +5,14 @@ package com.hyc.netcache
  * @date: 2020-01-10 15:55
  * @desc:
  */
-data class NetCacheBean(
+data class NetCacheBean<T>(
   val url : String,
   val saveTime : Long,
   val cacheConfig : CacheConfig,
-  val data : Any
+  val data : T
 ){
   override fun equals(other: Any?): Boolean {
-    if (other is NetCacheBean){
+    if (other is NetCacheBean<*>){
       return other.url == url
     }
     return false

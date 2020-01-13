@@ -1,10 +1,13 @@
-package com.hyc.netcache
+package com.hyc.netcache.file.cache
 
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.LruCache
+import com.hyc.netcache.CacheConfig
+import com.hyc.netcache.NetCacheBean
+import com.hyc.netcache.NetCachePool
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -16,19 +19,33 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * @desc:
  */
 class FileNetCachePool(context: Context) : NetCachePool {
-  private val mLruCache: LruCache<String, NetCacheBean> = LruCache(100)
+  override fun clearAllNetCache() {
+    mLruCache.evictAll()
+  }
+
+  override fun clearNetCache(key: String) {
+    mLruCache.remove(key)
+  }
+
+  private val mLruCache: LruCache<String, NetCacheBean<*>> = LruCache(100)
   private val mThreadPool: ExecutorService = ThreadPoolExecutor(
     0, 3,
     10000L, MILLISECONDS,
     LinkedBlockingQueue(100)
   )
-  private val mFileCacheTask = FileCacheWriteTask(context.externalCacheDir)
+  private val mFileCacheTask =
+    FileCacheWriteTask(context.externalCacheDir)
   private val mFileNetCacheReadTasks = mutableMapOf<String, FileNetCacheReadTask<*>>()
   private val mHandler = FileCacheHandler()
 
   override fun addNetCache(key: String, any: Any, cacheConfig: CacheConfig?) {
     val netCacheBean =
-      NetCacheBean(key, System.currentTimeMillis(), cacheConfig ?: getDefaultConfig(), any)
+      NetCacheBean(
+        key,
+        System.currentTimeMillis(),
+        cacheConfig ?: getDefaultConfig(),
+        any
+      )
     mLruCache.put(key, netCacheBean)
     mFileCacheTask.offerNetCache(netCacheBean)
     if (!mFileCacheTask.isRunning) {
@@ -65,7 +82,7 @@ class FileNetCachePool(context: Context) : NetCachePool {
     mThreadPool.execute(task)
   }
 
-  private fun isTimeOut(cacheBean: NetCacheBean): Boolean {
+  private fun isTimeOut(cacheBean: NetCacheBean<*>): Boolean {
     return System.currentTimeMillis() - cacheBean.saveTime > cacheBean.cacheConfig.lifeTime
   }
 

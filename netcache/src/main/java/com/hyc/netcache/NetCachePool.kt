@@ -11,4 +11,8 @@ interface NetCachePool {
 
   fun <T> findNetCache(key: String, clazz: Class<T>, callback: (cacheData: T?) -> Unit)
 
+  fun clearNetCache(key: String)
+
+  fun clearAllNetCache()
+
 }

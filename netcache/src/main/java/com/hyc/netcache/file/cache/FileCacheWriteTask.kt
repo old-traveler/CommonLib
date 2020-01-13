@@ -1,5 +1,6 @@
-package com.hyc.netcache
+package com.hyc.netcache.file.cache
 
+import com.hyc.netcache.NetCacheBean
 import java.io.File
 import java.util.LinkedList
 import java.util.Queue
@@ -10,11 +11,11 @@ import java.util.Queue
  * @desc:
  */
 class FileCacheWriteTask(val mCacheDir: File?) : Runnable {
-  private val mQueue: Queue<NetCacheBean> = LinkedList()
+  private val mQueue: Queue<NetCacheBean<*>> = LinkedList()
   @Volatile var isRunning = false
     private set
 
-  fun offerNetCache(netCacheBean: NetCacheBean) {
+  fun offerNetCache(netCacheBean: NetCacheBean<*>) {
     if (mQueue.contains(netCacheBean)) {
       synchronized(mQueue) {
         mQueue.remove(netCacheBean)
@@ -23,8 +24,8 @@ class FileCacheWriteTask(val mCacheDir: File?) : Runnable {
     mQueue.offer(netCacheBean)
   }
 
-  private fun pollNetCache(): NetCacheBean? {
-    val netCacheBean: NetCacheBean
+  private fun pollNetCache(): NetCacheBean<*>? {
+    val netCacheBean: NetCacheBean<*>
     synchronized(mQueue) {
       netCacheBean = mQueue.poll()
     }
@@ -32,7 +33,7 @@ class FileCacheWriteTask(val mCacheDir: File?) : Runnable {
   }
 
   override fun run() {
-    var netCacheBean: NetCacheBean?
+    var netCacheBean: NetCacheBean<*>?
     isRunning = true
     while ({ netCacheBean = pollNetCache();netCacheBean }() != null) {
 
