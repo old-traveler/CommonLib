@@ -23,9 +23,7 @@ class SpNetCachePool(context: Context) : NetCachePool {
     val netCacheBean =
       NetCacheBean(key, System.currentTimeMillis(), cacheConfig ?: getDefaultConfig(), any)
     mLruCache.put(key, netCacheBean)
-    val editor = mSpCache.edit()
-    editor.putString(key, mGosn.toJson(netCacheBean))
-    editor.apply()
+    mSpCache.edit().putString(key, mGosn.toJson(netCacheBean)).apply()
   }
 
   private fun getDefaultConfig(): CacheConfig {
@@ -55,17 +53,13 @@ class SpNetCachePool(context: Context) : NetCachePool {
   }
 
   override fun clearNetCache(key: String) {
-    val editor = mSpCache.edit()
     mLruCache.remove(key)
-    editor.remove(key)
-    editor.apply()
+    mSpCache.edit().remove(key).apply()
   }
 
   override fun clearAllNetCache() {
     mLruCache.evictAll()
-    val editor = mSpCache.edit()
-    editor.clear()
-    editor.apply()
+    mSpCache.edit().clear().apply()
   }
 
   private fun getRealData(cacheBean: NetCacheBean<*>): NetCacheBean<*>? {
