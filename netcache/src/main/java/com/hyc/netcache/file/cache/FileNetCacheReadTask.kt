@@ -9,7 +9,6 @@ import android.os.Handler
  */
 class FileNetCacheReadTask<T>(
   key: String,
-  clazz: Class<T>,
   handler: Handler
 ) :
   Runnable {

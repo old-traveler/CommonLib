@@ -19,9 +19,13 @@ class SpNetCachePool(context: Context) : NetCachePool {
     context.getSharedPreferences("BkNetCache", Context.MODE_PRIVATE)
   private val mGosn: Gson = Gson()
 
-  override fun addNetCache(key: String, any: Any, cacheConfig: CacheConfig?) {
+  override fun addNetCache(key: String, any: Any) {
+    addNetCache(key, any, getDefaultConfig())
+  }
+
+  override fun addNetCache(key: String, any: Any, cacheConfig: CacheConfig) {
     val netCacheBean =
-      NetCacheBean(key, System.currentTimeMillis(), cacheConfig ?: getDefaultConfig(), any)
+      NetCacheBean(key, System.currentTimeMillis(), cacheConfig, any)
     mLruCache.put(key, netCacheBean)
     mSpCache.edit().putString(key, mGosn.toJson(netCacheBean)).apply()
   }
@@ -30,26 +34,25 @@ class SpNetCachePool(context: Context) : NetCachePool {
     return CacheConfig(Long.MAX_VALUE)
   }
 
+  override fun <T> findNetCache(key: String, callback: (cacheData: T?) -> Unit) {
+    callback(findNetCache(key))
+  }
+
   @Suppress("UNCHECKED_CAST")
-  override fun <T> findNetCache(key: String, clazz: Class<T>, callback: (cacheData: T?) -> Unit) {
+  private fun <T> findNetCache(key: String): T? {
     mLruCache.get(key)?.let {
-      callback(getRealData(it)?.data as? T)
-      return
+      return getRealData(it)?.data as? T
     }
     val json = mSpCache.getString(key, null)
-    json?.let {
-      try {
-        val type = object : TypeToken<NetCacheBean<T>>() {}.type
-        val data: NetCacheBean<T>? = mGosn.fromJson(json, type)
-        data?.let {
-          callback(getRealData(it)?.data as? T)
-          return
-        }
-      } catch (e: JsonSyntaxException) {
-        e.printStackTrace()
-      }
+    json ?: return null
+    try {
+      val type = object : TypeToken<NetCacheBean<T>>() {}.type
+      val data: NetCacheBean<T>? = mGosn.fromJson(json, type)
+      return getRealData(data)?.data as? T
+    } catch (e: JsonSyntaxException) {
+      e.printStackTrace()
     }
-    callback(null)
+    return null
   }
 
   override fun clearNetCache(key: String) {
@@ -62,7 +65,8 @@ class SpNetCachePool(context: Context) : NetCachePool {
     mSpCache.edit().clear().apply()
   }
 
-  private fun getRealData(cacheBean: NetCacheBean<*>): NetCacheBean<*>? {
+  private fun getRealData(cacheBean: NetCacheBean<*>?): NetCacheBean<*>? {
+    cacheBean ?: return null
     if (isTimeOut(cacheBean)) {
       return null
     }

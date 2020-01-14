@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * @desc:
  */
 class FileNetCachePool(context: Context) : NetCachePool {
+
   override fun clearAllNetCache() {
     mLruCache.evictAll()
   }
@@ -38,12 +39,16 @@ class FileNetCachePool(context: Context) : NetCachePool {
   private val mFileNetCacheReadTasks = mutableMapOf<String, FileNetCacheReadTask<*>>()
   private val mHandler = FileCacheHandler()
 
-  override fun addNetCache(key: String, any: Any, cacheConfig: CacheConfig?) {
+  override fun addNetCache(key: String, any: Any) {
+    addNetCache(key, any, getDefaultConfig())
+  }
+
+  override fun addNetCache(key: String, any: Any, cacheConfig: CacheConfig) {
     val netCacheBean =
       NetCacheBean(
         key,
         System.currentTimeMillis(),
-        cacheConfig ?: getDefaultConfig(),
+        cacheConfig,
         any
       )
     mLruCache.put(key, netCacheBean)
@@ -58,7 +63,7 @@ class FileNetCachePool(context: Context) : NetCachePool {
   }
 
   @Suppress("UNCHECKED_CAST")
-  override fun <T> findNetCache(key: String, clazz: Class<T>, callback: (cacheData: T?) -> Unit) {
+  override fun <T> findNetCache(key: String, callback: (cacheData: T?) -> Unit) {
     val netCacheBean = mLruCache.get(key)
     netCacheBean?.let {
       val data = if (isTimeOut(netCacheBean)) null else it
@@ -74,7 +79,6 @@ class FileNetCachePool(context: Context) : NetCachePool {
     }
     task = FileNetCacheReadTask(
       key,
-      clazz,
       mHandler
     )
     //TODO 记录
