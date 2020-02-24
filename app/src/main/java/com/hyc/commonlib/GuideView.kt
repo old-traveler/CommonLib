@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import com.hyc.commonlib.view.ButtonLoadView
 
 /**
  * @author: 贺宇成
@@ -19,6 +20,7 @@ class GuideView(context : Context) {
     LayoutInflater.from(context).inflate(R.layout.layout_guide_view,null,false)
   val btnView : Button
   private val tvTitle : TextView
+  private val loadView : ButtonLoadView
 
   private var index = 0
 
@@ -26,11 +28,13 @@ class GuideView(context : Context) {
 
   fun setTitle(title : String?){
     tvTitle.text = title
+    loadView.startLoading()
   }
 
   init {
     btnView = mView.findViewById(R.id.btn_ok)
     tvTitle = mView.findViewById(R.id.tv_title)
+    loadView = mView.findViewById(R.id.loadingView)
   }
 
 
