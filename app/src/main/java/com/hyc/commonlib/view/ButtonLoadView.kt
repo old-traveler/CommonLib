@@ -19,7 +19,6 @@ class ButtonLoadView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
   private val mPaint: Paint = Paint()
-  private val mColor : Int = Color.WHITE
   private val mAlphas : IntArray = IntArray(3)
   private var mAnimator: ValueAnimator? = null
   private var mCurrentIndex : Int = 0
@@ -51,15 +50,12 @@ class ButtonLoadView @JvmOverloads constructor(
     if (mAnimator?.isRunning == true) {
       stopLoading()
     }
-    mAlphas[0] = 255
-    mAlphas[1] = 85
-    mAlphas[2] = 0
-    mCurrentIndex = 0
+    initState()
     mAnimator = ValueAnimator.ofInt(255, 0)
     mAnimator!!.duration = 500
     mAnimator!!.repeatCount = INFINITE
     mAnimator!!.repeatMode = ValueAnimator.RESTART
-    mAnimator!!.addUpdateListener { animation ->
+    mAnimator!!.addUpdateListener {
       if (mAlphas[mCurrentIndex] == 0){
         mCurrentIndex = getNextIndex(mCurrentIndex)
       }
@@ -70,6 +66,13 @@ class ButtonLoadView @JvmOverloads constructor(
     }
     //启动动画
     mAnimator!!.start()
+  }
+
+  private fun initState(){
+    mAlphas[0] = 255
+    mAlphas[1] = 85
+    mAlphas[2] = 0
+    mCurrentIndex = 0
   }
 
   private fun getNextIndex(index: Int) : Int{
