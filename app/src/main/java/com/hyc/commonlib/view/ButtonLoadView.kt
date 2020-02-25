@@ -19,9 +19,9 @@ class ButtonLoadView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
   private val mPaint: Paint = Paint()
-  private val mAlphas : IntArray = IntArray(3)
+  private val mAlphas: IntArray = IntArray(3)
   private var mAnimator: ValueAnimator? = null
-  private var mCurrentIndex : Int = 0
+  private var mCurrentIndex: Int = 0
 
   init {
     mPaint.isAntiAlias = true
@@ -41,7 +41,7 @@ class ButtonLoadView @JvmOverloads constructor(
     drawCircle(canvas, (width - radius), radius, 2)
   }
 
-  private fun drawCircle(canvas: Canvas, x: Float, radius: Float, index : Int) {
+  private fun drawCircle(canvas: Canvas, x: Float, radius: Float, index: Int) {
     canvas.drawCircle(x, radius, radius, mPaint)
     mPaint.alpha = mAlphas[index]
   }
@@ -56,7 +56,7 @@ class ButtonLoadView @JvmOverloads constructor(
     mAnimator!!.repeatCount = INFINITE
     mAnimator!!.repeatMode = ValueAnimator.RESTART
     mAnimator!!.addUpdateListener {
-      if (mAlphas[mCurrentIndex] == 0){
+      if (mAlphas[mCurrentIndex] == 0) {
         mCurrentIndex = getNextIndex(mCurrentIndex)
       }
       mAlphas[mCurrentIndex] -= 15
@@ -68,14 +68,14 @@ class ButtonLoadView @JvmOverloads constructor(
     mAnimator!!.start()
   }
 
-  private fun initState(){
+  private fun initState() {
     mAlphas[0] = 255
     mAlphas[1] = 85
     mAlphas[2] = 0
     mCurrentIndex = 0
   }
 
-  private fun getNextIndex(index: Int) : Int{
+  private fun getNextIndex(index: Int): Int {
     return (index + 1) % 3
   }
 
