@@ -12,7 +12,7 @@ import android.graphics.Color
 /**
  * @author: 贺宇成
  * @date: 2020-02-24 16:57
- * @desc:
+ * @desc: 三点加载动画
  */
 class ButtonLoadView @JvmOverloads constructor(
   context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
