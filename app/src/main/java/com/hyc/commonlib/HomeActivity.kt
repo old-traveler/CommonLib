@@ -18,8 +18,13 @@ class HomeActivity : AppCompatActivity() {
     setContentView(R.layout.activity_home)
     val dataList = mutableListOf<String>()
     dataList.add("高亮工具类")
+    dataList.add("拉起微信")
     list.adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList)
     list.setOnItemClickListener { _, _, position, _ ->
+      if (position == 1) {
+        openWeChat()
+        return@setOnItemClickListener
+      }
       val activity = when (position) {
         0 -> MainActivity::class.java
         else -> null
@@ -27,6 +32,14 @@ class HomeActivity : AppCompatActivity() {
       activity?.let {
         startActivity(Intent(this, it))
       }
+    }
+
+  }
+
+  private fun openWeChat() {
+    val intent = packageManager.getLaunchIntentForPackage("com.tencent.mm")
+    if (intent != null) {
+      startActivity(intent)
     }
   }
 

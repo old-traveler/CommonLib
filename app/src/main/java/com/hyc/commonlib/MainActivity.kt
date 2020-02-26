@@ -12,6 +12,8 @@ import kotlinx.android.synthetic.main.activity_main.tv_3
 import kotlinx.android.synthetic.main.activity_main.tv_4
 import kotlinx.android.synthetic.main.activity_main.tv_5
 
+
+
 class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
     initHighlightView()
   }
+
 
   private fun initHighlightView() {
     val guideView = GuideView(this)
