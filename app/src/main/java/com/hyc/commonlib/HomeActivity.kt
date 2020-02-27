@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_home.list
 
 /**
@@ -40,6 +41,8 @@ class HomeActivity : AppCompatActivity() {
     val intent = packageManager.getLaunchIntentForPackage("com.tencent.mm")
     if (intent != null) {
       startActivity(intent)
+    } else {
+      Toast.makeText(this, "请先安装微信", Toast.LENGTH_SHORT).show()
     }
   }
 
